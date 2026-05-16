@@ -23,6 +23,12 @@ public class UIController : MonoBehaviour
     [Tooltip("Optional: Title text shown inside the level-up panel (e.g. 'Choose Your Path').")]
     public TMP_Text levelUpPanelTitleText;
 
+    [Header("Promotion Panel")]
+    public GameObject promotionPanel;
+    public LevelUpSellectionButton[] promotionButtons;
+    [Tooltip("Optional: Title text shown inside the promotion panel.")]
+    public TMP_Text promotionPanelTitleText;
+
     public TMP_Text coinText;
     public GameObject levelEndScreen;
     public TMP_Text endTimeText;
@@ -68,6 +74,12 @@ public class UIController : MonoBehaviour
     {
         if (levelUpPanelTitleText != null)
             levelUpPanelTitleText.text = title;
+    }
+
+    public void SetPromotionPanelTitle(string title)
+    {
+        if (promotionPanelTitleText != null)
+            promotionPanelTitleText.text = title;
     }
 
     public void UpdateActiveClassDisplay()

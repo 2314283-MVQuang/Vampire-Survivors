@@ -15,6 +15,9 @@ public class ClassData : ScriptableObject
     [Header("Character Prefab")]
     public GameObject characterPrefab;
 
+    [Header("Overlay Accent")]
+    public GameObject overlayPrefab;
+
     [Header("Weapons")]
     public GameObject starterWeapon;
     public List<GameObject> classWeapons;

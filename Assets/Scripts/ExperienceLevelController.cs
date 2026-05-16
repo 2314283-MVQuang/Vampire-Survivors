@@ -122,18 +122,14 @@ public class ExperienceLevelController : MonoBehaviour
 
             bool allWeaponsMaxed = cm.AreAllWeaponsMaxedForClass(activeClass);
 
-            // --------------------------------------------------
-            // Case 2: All active-class weapons are maxed → offer Promotion (nếu có)
-            // --------------------------------------------------
-            if (allWeaponsMaxed && activeClass.promotionClass != null)
+            // ✅ Nếu tất cả weapons max → spawn ascend stones thay vì offer promotion
+            if (allWeaponsMaxed)
             {
-                UIController.instance.SetLevelUpPanelTitle("Choose Your Promotion");
-
-                choices.Add(new LevelUpChoice
+                if (AscendStoneManager.instance != null)
                 {
-                    type = ChoiceType.Promotion,
-                    classData = activeClass
-                });
+                    AscendStoneManager.instance.SpawnAscendStones();
+                    Debug.Log("✅ All weapons maxed! Ascend stones spawned.");
+                }
             }
 
             // --------------------------------------------------
@@ -157,8 +153,8 @@ public class ExperienceLevelController : MonoBehaviour
             }
             Debug.Log($"✅ Available weapons: {available.Count}");
 
-            // Số slot dành cho weapon (giữ lại ít nhất 1 slot cho class nếu cần)
-            int maxWeaponSlots = Mathf.Max(0, buttons.Length - 1);
+            // Số slot dành cho weapon (dùng hết buttons, class offer sẽ fill nếu còn slot)
+            int maxWeaponSlots = buttons.Length;  // ✅ Dùng hết buttons
             int weaponSlots = Mathf.Min(available.Count, maxWeaponSlots);
 
             UIController.instance.SetLevelUpPanelTitle("Choose Your Upgrade");
@@ -260,6 +256,84 @@ public class ExperienceLevelController : MonoBehaviour
                 buttons[i].gameObject.SetActive(false);
             }
         }
+
+        if (UIController.instance != null)
+            UIController.instance.UpdateActiveClassDisplay();
+    }
+
+    /// <summary>
+    /// Hiển thị menu promotion khi nhặt được ascend stone
+    /// </summary>
+    public void ShowAscendStonePromotionMenu()
+    {
+        if (ClassManager.instance == null)
+            return;
+
+        if (UIController.instance == null || UIController.instance.promotionPanel == null)
+            return;
+
+        // ✅ Check xem tất cả weapons đã max hết chưa
+        ClassData activeClass = ClassManager.instance.ActiveClass;
+        if (activeClass == null)
+            return;
+
+        bool allWeaponsMaxed = ClassManager.instance.AreAllWeaponsMaxedForClass(activeClass);
+        if (!allWeaponsMaxed)
+        {
+            Debug.LogWarning("⚠️ Cannot promote: Not all weapons are maxed!");
+            return;
+        }
+
+        // ✅ Build promotion choices cho tất cả classes của player
+        var buttons = UIController.instance.promotionButtons;
+        var choices = new List<LevelUpChoice>();
+
+        UIController.instance.SetPromotionPanelTitle("Choose Your Promotion");
+
+        // ✅ Offer promotion cho tất cả classes có promotionClass
+        foreach (var classData in ClassManager.instance.playerClasses)
+        {
+            if (classData == null) continue;
+            if (classData.promotionClass == null) continue;
+
+            choices.Add(new LevelUpChoice
+            {
+                type = ChoiceType.Promotion,
+                classData = classData
+            });
+
+            Debug.Log($"✅ Offered promotion: {classData.className} → {classData.promotionClass.className}");
+
+            if (choices.Count >= buttons.Length)
+                break;
+        }
+
+        // ✅ Nếu không có promotion nào → đóng menu
+        if (choices.Count == 0)
+        {
+            Debug.LogWarning("⚠️ No promotions available!");
+            UIController.instance.promotionPanel.SetActive(false);
+            Time.timeScale = 1f;
+            return;
+        }
+
+        // ✅ Apply choices to buttons
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (i < choices.Count)
+            {
+                buttons[i].gameObject.SetActive(true);
+                buttons[i].SetChoice(choices[i]);
+            }
+            else
+            {
+                buttons[i].gameObject.SetActive(false);
+            }
+        }
+
+        // ✅ Show panel
+        UIController.instance.promotionPanel.SetActive(true);
+        Time.timeScale = 0f;
 
         if (UIController.instance != null)
             UIController.instance.UpdateActiveClassDisplay();

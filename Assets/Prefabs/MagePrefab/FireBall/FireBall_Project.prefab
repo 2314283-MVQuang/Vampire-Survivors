@@ -4950,7 +4950,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7c82eddf3c9c234dad124fea0113b41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  moveSpeed: 7
 --- !u!114 &-5180778038466764673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4963,8 +4963,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba199e7879dfeae43bb5d828a8facb07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 0
-  lifeTime: 0
+  damageAmount: 15
+  lifeTime: 5
   growSpeed: 0
   shouldKnockBack: 0
   destroyParent: 0

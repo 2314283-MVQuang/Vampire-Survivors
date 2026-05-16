@@ -17,6 +17,9 @@ public class PlayerController : MonoBehaviour
     [HideInInspector]
     public List<Weapon> fullyLevelledWeapons = new List<Weapon>();
 
+    [HideInInspector]
+    private List<GameObject> activeOverlays = new List<GameObject>();
+
     private void Awake()
     {
         instance = this;
@@ -68,6 +71,36 @@ public void ApplyClassVisualOnly(ClassData classData)
             spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Thêm overlay (phụ kiện class) lên nhân vật
+    /// </summary>
+    public void AddOverlay(GameObject overlayPrefab)
+    {
+        if (overlayPrefab == null) return;
+
+        GameObject overlay = Instantiate(overlayPrefab, transform);
+        overlay.transform.localPosition = Vector3.zero;
+        overlay.transform.localRotation = Quaternion.identity;
+        activeOverlays.Add(overlay);
+
+        Debug.Log($"✅ Added overlay: {overlayPrefab.name}");
+    }
+
+    /// <summary>
+    /// Xóa tất cả overlays
+    /// </summary>
+    public void RemoveAllOverlays()
+    {
+        foreach (var overlay in activeOverlays)
+        {
+            if (overlay != null)
+                Destroy(overlay);
+        }
+        activeOverlays.Clear();
+
+        Debug.Log("✅ Removed all overlays");
+    }
+
     private void Update()
     {
         if (instance == null) return;
@@ -95,10 +128,32 @@ public void ApplyClassVisualOnly(ClassData classData)
 
     CacheComponents();
 
-    if (classData.animatorController != null && anim != null)
-        anim.runtimeAnimatorController = classData.animatorController;
+    
 
-    ApplyCharacterVisualFromPrefab(classData.characterPrefab);
+    // ✅ Chỉ thay đổi visual nếu đây là class đầu tiên hoặc promotion
+    if (ClassManager.instance != null && classData == ClassManager.instance.firstClassSelected)
+    {
+        
+        
+        if (classData.animatorController != null && anim != null)
+        {
+            
+            anim.runtimeAnimatorController = classData.animatorController;
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ Animator or animatorController is null!");
+        }
+
+        ApplyCharacterVisualFromPrefab(classData.characterPrefab);
+    }
+    else
+    {
+        Debug.LogWarning($"❌ NOT applying visual - firstClassSelected mismatch or null ClassManager");
+    }
+
+    // ✅ Nếu là secondary class (không phải first), chỉ thêm overlay + weapons
+    bool isSecondaryClass = ClassManager.instance != null && classData != ClassManager.instance.firstClassSelected;
 
     DisableCurrentWeapons();
     assignedWeapons.Clear();
@@ -133,6 +188,12 @@ public void ApplyClassVisualOnly(ClassData classData)
         }
     }
 
+    // ✅ Thêm overlay nếu là secondary class
+    if (isSecondaryClass && classData.overlayPrefab != null)
+    {
+        AddOverlay(classData.overlayPrefab);
+    }
+
     if (UIController.instance != null)
         UIController.instance.UpdateActiveClassDisplay();
 }
@@ -158,8 +219,18 @@ private void SpawnAndAssignWeapon(GameObject weaponPrefab)
     if (weapon != null)
     {
         weapon.weaponPrefab = weaponPrefab;  // ✅ Track prefab
-        assignedWeapons.Add(weapon);
-        Debug.Log($"✅ Spawned weapon: {weapon.name}");
+        
+        // ✅ Check nếu weapon đã max level → add vào fullyLevelledWeapons
+        if (weapon.IsMaxLevel())
+        {
+            fullyLevelledWeapons.Add(weapon);
+            Debug.Log($"✅ Spawned weapon (MAX LEVEL): {weapon.name}");
+        }
+        else
+        {
+            assignedWeapons.Add(weapon);
+            Debug.Log($"✅ Spawned weapon (Level {weapon.weaponLevel}): {weapon.name}");
+        }
     }
     else
     {
@@ -180,20 +251,36 @@ private void SpawnAndAssignWeapon(GameObject weaponPrefab)
 }
     private void ApplyCharacterVisualFromPrefab(GameObject characterPrefab)
     {
-        if (characterPrefab == null) return;
+        if (characterPrefab == null) 
+        {
+            Debug.LogWarning("⚠️ characterPrefab is NULL!");
+            return;
+        }
+
+        
 
         Animator prefabAnimator = characterPrefab.GetComponentInChildren<Animator>();
         SpriteRenderer prefabSprite = characterPrefab.GetComponentInChildren<SpriteRenderer>();
 
+        
+
         if (prefabAnimator != null && anim != null)
+        {
+            
             anim.runtimeAnimatorController = prefabAnimator.runtimeAnimatorController;
+        }
 
         if (prefabSprite != null && spriteRenderer != null)
         {
+            Debug.Log($"✅ Setting sprite: {prefabSprite.sprite?.name ?? "NULL"}");
             spriteRenderer.sprite = prefabSprite.sprite;
             spriteRenderer.color = prefabSprite.color;
             spriteRenderer.sortingLayerID = prefabSprite.sortingLayerID;
             spriteRenderer.sortingOrder = prefabSprite.sortingOrder;
+        }
+        else
+        {
+            Debug.LogWarning($"❌ prefabSprite or spriteRenderer is NULL!");
         }
     }
 

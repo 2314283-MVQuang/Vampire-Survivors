@@ -12,6 +12,9 @@ public class ClassManager : MonoBehaviour
     public List<ClassData> playerClasses = new List<ClassData>();
     public int activeClassIndex = 0;
     public int maxClasses = 3;
+    
+    [HideInInspector]
+    public ClassData firstClassSelected;  // ✅ Lưu class đầu tiên được chọn
 
     private void Awake()
     {
@@ -51,6 +54,10 @@ public class ClassManager : MonoBehaviour
         if (playerClasses.Contains(classData)) return;
         if (playerClasses.Count >= maxClasses) return;
 
+        // ✅ Track class đầu tiên được chọn
+        if (playerClasses.Count == 0)
+            firstClassSelected = classData;
+
         playerClasses.Add(classData);
 
         if (playerClasses.Count == 1)
@@ -83,11 +90,22 @@ public class ClassManager : MonoBehaviour
         int idx = playerClasses.IndexOf(classData);
         if (idx < 0) return;
 
+        // ✅ Update firstClassSelected → promotion class (để sprite thay đổi)
+        if (classData == firstClassSelected)
+        {
+            firstClassSelected = classData.promotionClass;
+            Debug.Log($"✅ Promoted first class: {classData.className} → {classData.promotionClass.className}");
+        }
+
+        // ✅ Replace class trong list (giữ overlays, không remove)
         playerClasses[idx] = classData.promotionClass;
         activeClassIndex = idx;
 
         if (PlayerController.instance != null)
+        {
             PlayerController.instance.ApplyClass(classData.promotionClass);
+            // ✅ Overlays vẫn ở, không cần reapply vì không remove
+        }
     }
 
     public List<ClassData> GetUnlockableClasses()
@@ -97,8 +115,16 @@ public class ClassManager : MonoBehaviour
         foreach (var c in allClasses)
         {
             if (c == null) continue;
-            if (!playerClasses.Contains(c))
-                result.Add(c);
+            if (playerClasses.Contains(c)) continue;  // ✅ Đã có rồi
+            
+            // ✅ Bỏ qua class cũ (nếu promotion của nó đã được nâng)
+            // Ví dụ: Nếu ArchMage đã được nâng, bỏ qua Mage
+            if (c.promotionClass != null && playerClasses.Contains(c.promotionClass))
+            {
+                continue;  // Skip - class này là old version
+            }
+            
+            result.Add(c);
         }
 
         return result;

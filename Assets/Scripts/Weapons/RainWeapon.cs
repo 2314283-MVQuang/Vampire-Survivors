@@ -35,10 +35,19 @@ public class RainWeapon : Weapon
         {
             shotCounter = stats[weaponLevel].timeBetweenAttacks;
             
-            // Find enemies in range
-            Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, weaponRange * stats[weaponLevel].range, whatIsEnemy);
+            float searchRadius = weaponRange * stats[weaponLevel].range;
             
-            if (enemies.Length > 0)
+            // Find enemies in range
+            Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, searchRadius, whatIsEnemy);
+            
+            Debug.Log($"🔍 RainWeapon: Found {enemies.Length} enemies, searchRadius={searchRadius}, layerMask={whatIsEnemy}");
+            
+            if (enemies.Length == 0)
+            {
+                Debug.LogWarning($"⚠️ No enemies found! Check LayerMask or enemy distance");
+            }
+            
+            if (enemies.Length > 0 && projectileToSpawn != null)
             {
                 // Spawn projectiles at random enemies
                 for (int i = 0; i < stats[weaponLevel].amount; i++)
@@ -49,6 +58,8 @@ public class RainWeapon : Weapon
                     Projectile newProjectile = Instantiate(projectileToSpawn, spawnPosition, Quaternion.identity);
                     newProjectile.gameObject.SetActive(true);
                     
+                    Debug.Log($"✅ Spawned RainProjectile at {spawnPosition}");
+                    
                     // Pass info to projectile
                     RainProjectile rainProjectile = newProjectile as RainProjectile;
                     if (rainProjectile != null)
@@ -56,10 +67,16 @@ public class RainWeapon : Weapon
                         rainProjectile.damager = explosionDamager;
                         rainProjectile.explosionRadius = stats[weaponLevel].range;
                         rainProjectile.damage = stats[weaponLevel].damage;
+                        rainProjectile.whatIsEnemy = whatIsEnemy;  // ✅ Pass layer mask
                     }
                 }
                 
                 SFXManager.instance.PlaySFXPitched(8);
+            }
+            else
+            {
+                if (projectileToSpawn == null)
+                    Debug.LogWarning("⚠️ projectileToSpawn is NULL!");
             }
         }
     }

@@ -45,8 +45,12 @@ public class EnemyDamager : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log($"🔵 OnTriggerEnter2D: {collision.name}, tag={collision.tag}, hasEnemyTag={collision.CompareTag("Enemy")}");
+        
         if (collision.CompareTag("Enemy"))
         {
+            Debug.Log($"✅ Hit Enemy: {collision.name}");
+            
             if (!damageOverTime)
             {
                 EnemyController enemy = collision.GetComponent<EnemyController>();
@@ -62,7 +66,14 @@ public class EnemyDamager : MonoBehaviour
             {
                 EnemyController enemy = collision.GetComponent<EnemyController>();
                 if (enemy != null && !enemiesInRange.Contains(enemy))
+                {
                     enemiesInRange.Add(enemy);
+                    
+                }
+                else if (enemy == null)
+                {
+                    Debug.LogWarning($"⚠️ No EnemyController on {collision.name}");
+                }
             }
         }
     }

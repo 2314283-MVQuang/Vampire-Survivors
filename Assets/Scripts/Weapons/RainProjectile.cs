@@ -9,26 +9,48 @@ using UnityEngine;
 public class RainProjectile : Projectile
 {
     public EnemyDamager damager;            // AoE damage zone template
-    public float explosionRadius = 2f;      // Radius of explosion
-    public float fallSpeed = 10f;           // Speed of falling
+    public float explosionRadius = 1.5f;      // Radius of explosion
+    public float fallSpeed = 3f;           // Speed of falling
     public float damage = 10f;              // Damage amount
+    public LayerMask whatIsEnemy;           // Enemy layer mask (from RainWeapon)
+    public float colliderRadiusMultiplier = 1f;  // Mở rộng collision radius (để enemies dễ hit)
     
     private bool hasExploded = false;       // Did it already explode?
     private float fallCounter;              // Counter for destruction
     
     private GameObject aoeIndicator;        // Visual circle showing AoE area
     private CircleCollider2D indicatorCollider;
+    
+    [Header("Animation")]
+    public Sprite[] animationFrames;        // 8 sprite frames for meteor animation
+    private SpriteRenderer spriteRenderer;  // SpriteRenderer for animation
+    private int currentFrameIndex = 0;      // Current animation frame
+    private float frameTimer = 0f;          // Timer for sprite animation
+    public float frameDuration = 0.1f;      // Duration per frame (0.1s)
 
     void Start()
     {
-        // Projectile falls with gravity
-        if (GetComponent<Rigidbody2D>() != null)
+        // ✅ B1: Scale down to 0.4x (smaller like Vampire Survivors)
+        transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+        
+        // ✅ Setup sprite animation
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+            spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
+        
+        // ✅ Meteor flies at angle like rain (diagonal fall)
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            GetComponent<Rigidbody2D>().gravityScale = 1f;
-            GetComponent<Rigidbody2D>().velocity = Vector2.down * fallSpeed;
+            rb.gravityScale = 1f;
+            // Random horizontal direction (left/right) + downward
+            float horizontalSpeed = Random.Range(-3f, 3f);  // Random left/right speed
+            rb.velocity = new Vector2(horizontalSpeed, -fallSpeed);
         }
         
         fallCounter = 0f;
+        frameTimer = 0f;
+        currentFrameIndex = 0;
         
         // Create visual indicator circle
         CreateAoEIndicator();
@@ -89,21 +111,45 @@ public class RainProjectile : Projectile
 
     void Update()
     {
+        // ✅ Sprite animation (8 frames)
+        if (animationFrames != null && animationFrames.Length > 0 && spriteRenderer != null)
+        {
+            frameTimer += Time.deltaTime;
+            
+            if (frameTimer >= frameDuration)
+            {
+                frameTimer -= frameDuration;
+                currentFrameIndex = (currentFrameIndex + 1) % animationFrames.Length;
+                spriteRenderer.sprite = animationFrames[currentFrameIndex];
+            }
+        }
+        
         // Check if hit ground or enemies
         fallCounter += Time.deltaTime;
         
-        // Auto-explode after 5 seconds if not hit
-        if (fallCounter > 5f && !hasExploded)
+        // ✅ Auto-explode if projectile falls too low (y < -180)
+        if (!hasExploded && transform.position.y < -180f)
         {
+            Debug.Log($"⚠️ Projectile fell below -180, auto-exploding at {transform.position}");
+            Explode();
+        }
+        
+        // Auto-explode after 3 seconds if not hit
+        if (fallCounter > 3f && !hasExploded)
+        {
+            Debug.Log($"⚠️ Projectile timeout after 3s, auto-exploding at {transform.position}");
             Explode();
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Explode on hitting ground or anything solid
-        if (!hasExploded && (collision.CompareTag("Ground") || collision.name.Contains("Ground")))
+        Debug.Log($"🔵 OnTriggerEnter2D: {collision.name}");
+        
+        // ✅ Explode on hitting ANYTHING (ground, enemies, walls)
+        if (!hasExploded)
         {
+            Debug.Log($"✅ Hit something! Exploding at {transform.position}");
             Explode();
         }
     }
@@ -113,6 +159,12 @@ public class RainProjectile : Projectile
         if (hasExploded) return;
         hasExploded = true;
         
+        // ✅ Keep meteor visible 0.5s during explosion (don't hide immediately)
+        
+        // ✅ Stop animation when exploding
+        frameTimer = 0f;
+        currentFrameIndex = 0;
+        
         // Remove AoE indicator
         if (aoeIndicator != null)
             Destroy(aoeIndicator);
@@ -121,9 +173,87 @@ public class RainProjectile : Projectile
         if (damager != null)
         {
             EnemyDamager explosionZone = Instantiate(damager, transform.position, Quaternion.identity);
-            explosionZone.transform.localScale = Vector3.one * explosionRadius;
+            explosionZone.transform.localScale = Vector3.one * explosionRadius * 0.6f;  // ✅ Scale down to 0.6x so not too big
             explosionZone.damageAmount = damage;
+            explosionZone.damageOverTime = true;  // ✅ Enable continuous damage
+            explosionZone.timeBetweenDamage = 0.2f;  // Damage every 0.2s
+            explosionZone.shouldKnockBack = true;  // Enable knockback
+            explosionZone.lifeTime = 1.5f;  // ✅ Extend explosion time so enemies can trigger
             explosionZone.gameObject.SetActive(true);
+            
+            // ✅ Ensure Rigidbody2D exists (REQUIRED for trigger collision)
+            Rigidbody2D rb = explosionZone.GetComponent<Rigidbody2D>();
+            if (rb == null)
+            {
+                rb = explosionZone.gameObject.AddComponent<Rigidbody2D>();
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.isKinematic = true;
+            }
+            
+            // ✅ Ensure CircleCollider2D exists and is trigger
+            CircleCollider2D collider = explosionZone.GetComponent<CircleCollider2D>();
+            if (collider == null)
+            {
+                collider = explosionZone.gameObject.AddComponent<CircleCollider2D>();
+            }
+            collider.isTrigger = true;
+            collider.radius = explosionRadius * colliderRadiusMultiplier;  // ✅ Mở rộng radius
+            
+            // ✅ Check if damager component exists
+            EnemyDamager damagerComponent = explosionZone.GetComponent<EnemyDamager>();
+            
+            
+            // ✅ Find all enemies in explosion radius manually
+            Collider2D[] enemiesInExplosion = Physics2D.OverlapCircleAll(explosionZone.transform.position, explosionRadius, whatIsEnemy);
+            Debug.Log($"🔍 Enemies (layer search): {enemiesInExplosion.Length}");
+            
+            Debug.Log($"📍 Explosion pos: {explosionZone.transform.position}, radius: {explosionRadius}");
+            
+            // Fallback: if layer search fails, find by EnemyController component
+            if (enemiesInExplosion.Length == 0)
+            {
+                // Search with small radius first
+                Collider2D[] allColliders = Physics2D.OverlapCircleAll(explosionZone.transform.position, explosionRadius);
+                Debug.Log($"🔍 Colliders in radius {explosionRadius}: {allColliders.Length}");
+                
+                // If not enough found, search bigger radius to debug
+                if (allColliders.Length < 2)
+                {
+                    allColliders = Physics2D.OverlapCircleAll(explosionZone.transform.position, 50f);
+                    Debug.Log($"🔍 Colliders in radius 50: {allColliders.Length}");
+                }
+                
+                // List all colliders found
+                for (int j = 0; j < allColliders.Length; j++)
+                {
+                    Debug.Log($"  Collider {j}: {allColliders[j].name} at {allColliders[j].transform.position}, distance: {Vector3.Distance(explosionZone.transform.position, allColliders[j].transform.position)}");
+                }
+                
+                List<Collider2D> enemyColliders = new List<Collider2D>();
+                
+                for (int i = 0; i < allColliders.Length; i++)
+                {
+                    Debug.Log($"  Collider {i}: {allColliders[i].name}, hasEnemyController: {allColliders[i].GetComponent<EnemyController>() != null}");
+                    
+                    if (allColliders[i].GetComponent<EnemyController>() != null)
+                    {
+                        enemyColliders.Add(allColliders[i]);
+                        Debug.Log($"  ✅ Found enemy: {allColliders[i].name} at {allColliders[i].transform.position}");
+                    }
+                }
+                
+                enemiesInExplosion = enemyColliders.ToArray();
+            }
+            
+            for (int i = 0; i < enemiesInExplosion.Length; i++)
+            {
+                EnemyController enemy = enemiesInExplosion[i].GetComponent<EnemyController>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(damage, true);  // Apply damage immediately
+                    Debug.Log($"✅ Damaged enemy: {enemy.name}, damage: {damage}");
+                }
+            }
             
             // Add temporary visual effect for explosion
             CreateExplosionEffect(explosionZone);
@@ -132,8 +262,17 @@ public class RainProjectile : Projectile
             if (SFXManager.instance != null)
                 SFXManager.instance.PlaySFXPitched(7);
         }
+        else
+        {
+            Debug.LogWarning("⚠️ Damager is NULL in Explode!");
+        }
 
-        // Destroy projectile
+        // ✅ Delay destruction by 0.5 seconds so player can see meteor during explosion
+        Invoke(nameof(DestroyProjectile), 0.5f);
+    }
+    
+    void DestroyProjectile()
+    {
         Destroy(gameObject);
     }
     
@@ -148,7 +287,15 @@ public class RainProjectile : Projectile
         
         // Add sprite renderer for flash effect
         SpriteRenderer flashRenderer = explosionVFX.AddComponent<SpriteRenderer>();
-        flashRenderer.sprite = explosionZone.GetComponent<SpriteRenderer>()?.sprite;
+        
+        // Try to get sprite from explosionZone, otherwise use projectile's sprite
+        Sprite explosionSprite = explosionZone.GetComponent<SpriteRenderer>()?.sprite;
+        if (explosionSprite == null && spriteRenderer != null)
+        {
+            explosionSprite = spriteRenderer.sprite;
+        }
+        
+        flashRenderer.sprite = explosionSprite;
         flashRenderer.color = new Color(1f, 0.8f, 0f, 0.6f);  // Yellow flash
         flashRenderer.sortingOrder = 0;
         

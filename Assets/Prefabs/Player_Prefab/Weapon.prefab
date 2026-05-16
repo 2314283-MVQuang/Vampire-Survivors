@@ -47,7 +47,7 @@ MonoBehaviour:
   stats:
   - speed: 10
     damage: 20
-    range: 4
+    range: 3
     timeBetweenAttacks: 2
     amount: 2
     duration: 2
@@ -66,7 +66,7 @@ MonoBehaviour:
     amount: 2
     duration: 2
     upgradeText: 0
-  weaponLevel: 3
+  weaponLevel: 2
   statsUpdated: 0
   icon: {fileID: -1283994490, guid: 99f10abcf979e904b883da0c6922d74f, type: 3}
   ownerClass: {fileID: 11400000, guid: 277749f174911b84eb7dc8372e451264, type: 2}

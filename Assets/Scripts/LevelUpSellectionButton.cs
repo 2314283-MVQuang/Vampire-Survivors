@@ -138,8 +138,14 @@ public class LevelUpSellectionButton : MonoBehaviour
         if (UIController.instance != null)
             UIController.instance.UpdateActiveClassDisplay();
 
-        if (UIController.instance != null && UIController.instance.levelUpPanel != null)
-            UIController.instance.levelUpPanel.SetActive(false);
+        // ✅ Close the active panel (level-up or promotion)
+        if (UIController.instance != null)
+        {
+            if (UIController.instance.promotionPanel != null && UIController.instance.promotionPanel.activeInHierarchy)
+                UIController.instance.promotionPanel.SetActive(false);
+            else if (UIController.instance.levelUpPanel != null)
+                UIController.instance.levelUpPanel.SetActive(false);
+        }
 
         Time.timeScale = 1f;
     }
@@ -161,6 +167,14 @@ public class LevelUpSellectionButton : MonoBehaviour
     private void HandleClassChoice(ClassData classData)
     {
         if (ClassManager.instance == null || classData == null) return;
+        
+        // ✅ Set firstClassSelected nếu chưa có (lần đầu chọn class từ level-up)
+        if (ClassManager.instance.firstClassSelected == null)
+        {
+            ClassManager.instance.firstClassSelected = classData;
+            Debug.Log($"✅ Set firstClassSelected = {classData.className}");
+        }
+        
         ClassManager.instance.ApplyClass(classData);
     }
 
