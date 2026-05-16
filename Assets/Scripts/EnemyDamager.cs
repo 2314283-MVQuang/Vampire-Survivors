@@ -76,6 +76,20 @@ public class EnemyDamager : MonoBehaviour
                 }
             }
         }
+        else if (collision.CompareTag("Breakable")) 
+        {
+            BreakableBox box = collision.GetComponent<BreakableBox>();
+            if (box != null)
+            {
+                box.TakeDamage(damageAmount);
+                
+                // Vũ khí có thuộc tính nổ/hủy khi chạm thì tự hủy luôn
+                if (destroyOnImpact && !damageOverTime) 
+                {
+                    Destroy(gameObject);
+                }
+            }
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
