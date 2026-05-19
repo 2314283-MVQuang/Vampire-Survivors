@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8032401849233444}
   - component: {fileID: 8802369563724891389}
   - component: {fileID: 6285885989123462483}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ruongvatpham
   m_TagString: Breakable
   m_Icon: {fileID: 0}
