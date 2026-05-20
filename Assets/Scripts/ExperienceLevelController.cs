@@ -20,12 +20,12 @@ public class ExperienceLevelController : MonoBehaviour
         // Safety: make sure expLevels has at least one base value
         if (expLevels.Count == 0)
         {
-            expLevels.Add(30); // base exp requirement for level 1 -> 2
+            expLevels.Add(20); // base exp requirement for level 1 -> 2
         }
 
         while (expLevels.Count < levelCount)
         {
-            expLevels.Add(Mathf.CeilToInt(expLevels[expLevels.Count - 1] * 3.0f));
+            expLevels.Add(Mathf.CeilToInt(expLevels[expLevels.Count - 1] * 2.5f));
         }
 
         if (UIController.instance != null)
