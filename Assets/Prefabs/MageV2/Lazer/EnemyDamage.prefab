@@ -45,14 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba199e7879dfeae43bb5d828a8facb07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 35
+  damageAmount: 25
   lifeTime: 0
   growSpeed: 0
   shouldKnockBack: 1
   destroyParent: 0
-  damageOverTime: 1
+  damageOverTime: 0
   timeBetweenDamage: 4
-  destroyOnImpact: 0
+  destroyOnImpact: 1
 --- !u!212 &8458655957557768103
 SpriteRenderer:
   m_ObjectHideFlags: 0

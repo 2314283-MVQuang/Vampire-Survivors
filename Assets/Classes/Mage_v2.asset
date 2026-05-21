@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a010f93b2ff471c9703d5e7261cde2e, type: 3}
   m_Name: Mage_v2
   m_EditorClassIdentifier: 
-  className: 
+  className: ArchMage
   classDescription: 
   classIcon: {fileID: 21300000, guid: c0e29712867da764c947655be8e0b95a, type: 3}
   animatorController: {fileID: 0}
@@ -23,6 +23,6 @@ MonoBehaviour:
   - {fileID: 6633607339654328984, guid: c67b758cc0317bd45bfe43c02f9dba82, type: 3}
   - {fileID: 2256285875895207452, guid: d9ed1298bcd60ef4f8ad6ee0987bc5f8, type: 3}
   - {fileID: 6461122912165680347, guid: 27bd91a012285704793d2068778b056c, type: 3}
-  promotionClass: {fileID: 0}
+  promotionClass: {fileID: 11400000, guid: e6eb2e20c84b1024199d356124ad4548, type: 2}
   promotionDescription: 
   secondClassUnlockChance: 1

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mage
   m_EditorClassIdentifier: 
   className: Mage
-  classDescription: A powerful spellcaster who commands the forces of magic.
+  classDescription: 
   classIcon: {fileID: 21300000, guid: 64a0571a40b6eb64c8ff9e8fbb5aa704, type: 3}
   animatorController: {fileID: 9100000, guid: 8f34e4eb3417371409035942cd9b0362, type: 2}
   characterPrefab: {fileID: 160603543031662021, guid: ccdbd699f6ab3bb41b562ce7d125c4f9, type: 3}

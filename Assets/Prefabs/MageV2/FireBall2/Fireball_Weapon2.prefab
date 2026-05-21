@@ -46,21 +46,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats:
   - speed: 7
-    damage: 20
+    damage: 30
     range: 8
     timeBetweenAttacks: 2
     amount: 3
     duration: 5
     upgradeText: Fire ball
   - speed: 8
-    damage: 25
+    damage: 40
     range: 10
     timeBetweenAttacks: 1.5
     amount: 5
     duration: 5
     upgradeText: Fire ball 2
   - speed: 9
-    damage: 30
+    damage: 50
     range: 12
     timeBetweenAttacks: 1.5
     amount: 7

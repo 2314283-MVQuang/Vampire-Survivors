@@ -89,7 +89,6 @@ public class ExperienceLevelController : MonoBehaviour
             return;
 
         var buttons = UIController.instance.levelUpButtons;
-        Debug.Log($"✅ Buttons count: {buttons.Length}");
         var choices = new List<LevelUpChoice>();
         ClassManager cm = ClassManager.instance;
 
@@ -151,7 +150,7 @@ public class ExperienceLevelController : MonoBehaviour
                     }
                 }
             }
-            Debug.Log($"✅ Available weapons: {available.Count}");
+            
 
             // Số slot dành cho weapon (dùng hết buttons, class offer sẽ fill nếu còn slot)
             int maxWeaponSlots = buttons.Length;  // ✅ Dùng hết buttons

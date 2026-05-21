@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 150
-  healthPotionPrefab: {fileID: 0}
+  healthPotionPrefab: {fileID: 296049937883220567, guid: 0c64dfb4541f02841ae747839334f5df, type: 3}
   expOrbPrefab: {fileID: 0}
   coinPrefab: {fileID: 0}
   dropChance: 0.8

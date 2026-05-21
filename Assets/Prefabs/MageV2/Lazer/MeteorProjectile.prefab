@@ -49,23 +49,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 0
   damager: {fileID: 0}
-  explosionRadius: 2
-  fallSpeed: 2.1
+  explosionRadius: 1
+  fallSpeed: 5.2
   damage: 10
+  explosionDuration: 0.6
   whatIsEnemy:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   colliderRadiusMultiplier: 1
+  targetPosition: {x: 0, y: 0, z: 0}
   animationFrames:
   - {fileID: -1810502106, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
   - {fileID: -214136622, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
   - {fileID: -124976952, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
   - {fileID: -102325218, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
   - {fileID: -60679537, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
-  - {fileID: 709936237, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
-  - {fileID: 423999751, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
-  - {fileID: -1349819937, guid: c49528117fbce514c98661d15c52d8b5, type: 3}
-  frameDuration: 0.4
+  frameDuration: 1
 --- !u!212 &-4839931545053367350
 SpriteRenderer:
   m_ObjectHideFlags: 0

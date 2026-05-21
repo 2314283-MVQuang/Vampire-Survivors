@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Rain/Meteor weapon that spawns projectiles from above enemies.
-/// Projectiles fall down and create AoE damage zones on landing.
+/// Rain/Meteor weapon that spawns projectiles above enemies INSIDE the camera view.
 /// </summary>
 public class RainWeapon : Weapon
 {
-    public Projectile projectileToSpawn;      // Falling projectile prefab
-    public EnemyDamager explosionDamager;     // AoE damage zone on impact
-    
-    private float shotCounter;                // Counter for shot timing
-    public float weaponRange = 15f;           // Range to find enemies
-    public LayerMask whatIsEnemy;             // Enemy layer mask
-    
-    public float spawnHeightAbove = 5f;       // How high projectiles spawn above (in pixels/units)
+    [Header("Prefabs")]
+    public RainProjectile projectileToSpawn;
+    public EnemyDamager explosionDamager;
+
+    [Header("Settings")]
+    public float weaponRange = 15f;
+    public LayerMask whatIsEnemy;
+    public float spawnHeightAbove = 8f;     // Cao hơn để thấy meteor rơi rõ hơn
+
+    private float shotCounter;
+    private Collider2D[] localOverlapResults = new Collider2D[150];
 
     void Start()
     {
@@ -24,7 +26,9 @@ public class RainWeapon : Weapon
 
     void Update()
     {
-        if (statsUpdated == true)
+        if (stats == null || weaponLevel >= stats.Count) return;
+
+        if (statsUpdated)
         {
             statsUpdated = false;
             SetStats();
@@ -34,59 +38,82 @@ public class RainWeapon : Weapon
         if (shotCounter <= 0)
         {
             shotCounter = stats[weaponLevel].timeBetweenAttacks;
-            
+
             float searchRadius = weaponRange * stats[weaponLevel].range;
-            
-            // Find enemies in range
-            Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, searchRadius, whatIsEnemy);
-            
-            Debug.Log($"🔍 RainWeapon: Found {enemies.Length} enemies, searchRadius={searchRadius}, layerMask={whatIsEnemy}");
-            
-            if (enemies.Length == 0)
+            int enemyCount = Physics2D.OverlapCircleNonAlloc(
+                transform.position, searchRadius, localOverlapResults, whatIsEnemy);
+
+            if (enemyCount == 0)
             {
-                Debug.LogWarning($"⚠️ No enemies found! Check LayerMask or enemy distance");
+                Debug.LogWarning("⚠️ No enemies found!");
+                return;
             }
-            
-            if (enemies.Length > 0 && projectileToSpawn != null)
+
+            if (projectileToSpawn == null)
             {
-                // Spawn projectiles at random enemies
-                for (int i = 0; i < stats[weaponLevel].amount; i++)
+                Debug.LogWarning("⚠️ projectileToSpawn is NULL!");
+                return;
+            }
+
+            // Lấy camera bounds để chỉ target enemy trong màn hình
+            Camera cam = Camera.main;
+
+            float spawnAmount = Mathf.Max(stats[weaponLevel].amount, 1);
+            int spawned = 0;
+            int maxAttempts = enemyCount * 2; // tránh infinite loop
+            int attempts = 0;
+
+            while (spawned < spawnAmount && attempts < maxAttempts)
+            {
+                attempts++;
+
+                int randomIndex = Random.Range(0, enemyCount);
+                Collider2D targetEnemy = localOverlapResults[randomIndex];
+                if (targetEnemy == null) continue;
+
+                Vector3 enemyPosition = targetEnemy.transform.position;
+
+                // FIX: Chỉ spawn nếu enemy nằm trong camera
+                if (cam != null)
                 {
-                    Vector3 enemyPosition = enemies[Random.Range(0, enemies.Length)].transform.position;
-                    Vector3 spawnPosition = enemyPosition + Vector3.up * spawnHeightAbove;
-                    
-                    Projectile newProjectile = Instantiate(projectileToSpawn, spawnPosition, Quaternion.identity);
-                    newProjectile.gameObject.SetActive(true);
-                    
-                    Debug.Log($"✅ Spawned RainProjectile at {spawnPosition}");
-                    
-                    // Pass info to projectile
-                    RainProjectile rainProjectile = newProjectile as RainProjectile;
-                    if (rainProjectile != null)
+                    Vector3 viewportPos = cam.WorldToViewportPoint(enemyPosition);
+                    bool inCamera = viewportPos.x > 0.05f && viewportPos.x < 0.95f
+                                 && viewportPos.y > 0.05f && viewportPos.y < 0.95f;
+                    if (!inCamera)
                     {
-                        rainProjectile.damager = explosionDamager;
-                        rainProjectile.explosionRadius = stats[weaponLevel].range;
-                        rainProjectile.damage = stats[weaponLevel].damage;
-                        rainProjectile.whatIsEnemy = whatIsEnemy;  // ✅ Pass layer mask
+                        Debug.Log("⚠️ Enemy outside camera, skipping");
+                        continue;
                     }
                 }
-                
+
+                Vector3 spawnPosition = enemyPosition + Vector3.up * spawnHeightAbove;
+
+                RainProjectile newProjectile = Instantiate(projectileToSpawn, spawnPosition, Quaternion.identity);
+                newProjectile.gameObject.SetActive(true);
+
+                newProjectile.damager           = explosionDamager;
+                newProjectile.explosionRadius   = stats[weaponLevel].range;
+                newProjectile.damage            = stats[weaponLevel].damage;
+                newProjectile.whatIsEnemy       = whatIsEnemy;
+                newProjectile.targetPosition    = enemyPosition;
+                newProjectile.explosionDuration = stats[weaponLevel].duration;
+
+                spawned++;
+            }
+
+            if (spawned > 0 && SFXManager.instance != null)
                 SFXManager.instance.PlaySFXPitched(8);
-            }
-            else
-            {
-                if (projectileToSpawn == null)
-                    Debug.LogWarning("⚠️ projectileToSpawn is NULL!");
-            }
         }
     }
 
     void SetStats()
     {
+        if (stats == null || weaponLevel >= stats.Count) return;
+
         if (explosionDamager != null)
         {
             explosionDamager.damageAmount = stats[weaponLevel].damage;
-            explosionDamager.lifeTime = stats[weaponLevel].duration;
+            explosionDamager.lifeTime     = stats[weaponLevel].duration;
         }
 
         shotCounter = 0f;
