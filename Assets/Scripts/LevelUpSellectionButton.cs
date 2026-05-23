@@ -54,21 +54,24 @@ public class LevelUpSellectionButton : MonoBehaviour
                             (PlayerController.instance.assignedWeapons.Contains(weapon) ||
                              PlayerController.instance.fullyLevelledWeapons.Contains(weapon));
 
+        // ✅ Xoá "(Clone)" khỏi weapon name
+        string weaponName = weapon.name.Replace("(Clone)", "").Trim();
+
         if (alreadyOwned && weapon.stats != null && weapon.stats.Count > 0)
         {
             int nextLevel = Mathf.Min(weapon.weaponLevel + 1, weapon.stats.Count - 1);
             upgradeDescText.text = weapon.stats[nextLevel].upgradeText ?? "Upgrade weapon";
-            nameLevelText.text = weapon.name + " - Lvl " + weapon.weaponLevel;
+            nameLevelText.text = weaponName + " - Lvl " + weapon.weaponLevel;
         }
         else if (weapon.stats != null && weapon.stats.Count > 0)
         {
-            upgradeDescText.text = "Unlock " + weapon.name;
-            nameLevelText.text = weapon.name;
+            upgradeDescText.text = "Unlock " + weaponName;
+            nameLevelText.text = weaponName;
         }
         else
         {
             upgradeDescText.text = "No stats configured";
-            nameLevelText.text = weapon.name ?? "Unknown Weapon";
+            nameLevelText.text = weaponName ?? "Unknown Weapon";
         }
 
         if (weaponIcon != null) weaponIcon.sprite = weapon.icon;
@@ -112,7 +115,10 @@ public class LevelUpSellectionButton : MonoBehaviour
                 ? "Promote " + classData.className + " to a stronger form!"
                 : classData.promotionDescription;
 
-        if (weaponIcon != null && classData.classIcon != null)
+        // ✅ Lấy icon từ promotionClass (V2) chứ ko phải classData (V1)
+        if (weaponIcon != null && classData.promotionClass != null && classData.promotionClass.classIcon != null)
+            weaponIcon.sprite = classData.promotionClass.classIcon;
+        else if (weaponIcon != null && classData.classIcon != null)
             weaponIcon.sprite = classData.classIcon;
     }
 

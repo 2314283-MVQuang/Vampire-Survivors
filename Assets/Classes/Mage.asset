@@ -24,5 +24,5 @@ MonoBehaviour:
   - {fileID: 7280826198314774508, guid: 7dea0caf40b40994ba62de0941e057a0, type: 3}
   - {fileID: 3433852762559700994, guid: bb116285491c15c4eb99f6760d27de86, type: 3}
   promotionClass: {fileID: 11400000, guid: f9432f4e33632c14ba9e7ab4dbb46570, type: 2}
-  promotionDescription: Promote Mage to Arch Mage - unlock devastating arcane mastery!
-  secondClassUnlockChance: 1
+  promotionDescription: 
+  secondClassUnlockChance: 0.154

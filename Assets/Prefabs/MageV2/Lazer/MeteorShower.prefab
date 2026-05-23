@@ -51,21 +51,21 @@ MonoBehaviour:
     timeBetweenAttacks: 6
     amount: 3
     duration: 0
-    upgradeText: 
+    upgradeText: Meteor Shower 1
   - speed: 2
     damage: 35
     range: 2.5
     timeBetweenAttacks: 5.8
     amount: 5
     duration: 0
-    upgradeText: 
+    upgradeText: Meteor Shower 2
   - speed: 2
     damage: 45
     range: 3
     timeBetweenAttacks: 5.5
     amount: 7
     duration: 0
-    upgradeText: 
+    upgradeText: Meteor Shower 3
   weaponLevel: 0
   statsUpdated: 0
   icon: {fileID: -102325218, guid: c49528117fbce514c98661d15c52d8b5, type: 3}

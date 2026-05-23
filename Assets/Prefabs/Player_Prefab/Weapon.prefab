@@ -73,7 +73,7 @@ MonoBehaviour:
   weaponPrefab: {fileID: 0}
   damager: {fileID: -6621920720714961777, guid: e19cf2ae1e4f5aa40afdf27a7234ca02, type: 3}
   projectile: {fileID: 5160484337711474397, guid: e19cf2ae1e4f5aa40afdf27a7234ca02, type: 3}
-  weaponRange: 3
+  weaponRange: 2
   whatIsEnemy:
     serializedVersion: 2
     m_Bits: 64

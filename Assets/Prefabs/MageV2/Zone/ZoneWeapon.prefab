@@ -101,21 +101,21 @@ MonoBehaviour:
     timeBetweenAttacks: 2
     amount: 0
     duration: 10
-    upgradeText: 
+    upgradeText: DarkZone 1
   - speed: 1
     damage: 30
     range: 2
     timeBetweenAttacks: 1.8
     amount: 0
     duration: 12
-    upgradeText: 
+    upgradeText: DarkZone 2
   - speed: 0.8
     damage: 35
     range: 2.5
     timeBetweenAttacks: 1.5
     amount: 0
     duration: 14
-    upgradeText: 
+    upgradeText: DarkZone 3
   weaponLevel: 0
   statsUpdated: 0
   icon: {fileID: 216723485, guid: a8f9d1da376d9b141906fe19993f1830, type: 3}

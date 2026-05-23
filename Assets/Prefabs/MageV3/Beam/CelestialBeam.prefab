@@ -52,21 +52,21 @@ MonoBehaviour:
     timeBetweenAttacks: 6
     amount: 5
     duration: 0
-    upgradeText: 
+    upgradeText: Celestial Beam 1
   - speed: 0
     damage: 100
     range: 2.5
     timeBetweenAttacks: 5
     amount: 7
     duration: 0
-    upgradeText: 
+    upgradeText: Celestial Beam 2
   - speed: 0
     damage: 150
     range: 3
     timeBetweenAttacks: 4.5
     amount: 10
     duration: 0
-    upgradeText: 
+    upgradeText: Celestial Beam 3
   weaponLevel: 0
   statsUpdated: 0
   icon: {fileID: 1071002035, guid: f3fe1b138c8c9d24e91dfe273782cd8d, type: 3}

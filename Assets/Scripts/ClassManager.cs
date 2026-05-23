@@ -19,6 +19,14 @@ public class ClassManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        Debug.Log($"🔍 ClassManager.Awake - playerClasses.Count: {playerClasses.Count}");
+        if (playerClasses.Count > 0)
+        {
+            for (int i = 0; i < playerClasses.Count; i++)
+            {
+                Debug.Log($"  Class {i}: {playerClasses[i]?.className ?? "NULL"}");
+            }
+        }
     }
 
     public ClassData ActiveClass
@@ -89,6 +97,22 @@ public class ClassManager : MonoBehaviour
 
         int idx = playerClasses.IndexOf(classData);
         if (idx < 0) return;
+
+        // ✅ CLEAR TẤT CẢ weapons trước promote (stop all coroutines, effects)
+        if (PlayerController.instance != null)
+        {
+            // Disable tất cả weapons và stop coroutines
+            Weapon[] allWeapons = PlayerController.instance.GetComponentsInChildren<Weapon>(true);
+            foreach (Weapon weapon in allWeapons)
+            {
+                if (weapon != null)
+                {
+                    weapon.StopActiveSkill();
+                    weapon.gameObject.SetActive(false);
+                }
+            }
+            Debug.Log($"✅ Disabled all {allWeapons.Length} weapons before promote");
+        }
 
         // ✅ Update firstClassSelected → promotion class (để sprite thay đổi)
         if (classData == firstClassSelected)

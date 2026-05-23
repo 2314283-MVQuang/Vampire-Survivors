@@ -52,21 +52,21 @@ MonoBehaviour:
     timeBetweenAttacks: 2
     amount: 3
     duration: 5
-    upgradeText: Fire ball
+    upgradeText: Meteor 1
   - speed: 8
     damage: 40
     range: 10
     timeBetweenAttacks: 1.5
     amount: 5
     duration: 5
-    upgradeText: Fire ball 2
+    upgradeText: Meteor 2
   - speed: 9
     damage: 50
     range: 12
     timeBetweenAttacks: 1.5
     amount: 7
     duration: 5
-    upgradeText: Fire ball 3
+    upgradeText: Meteor 3
   weaponLevel: 0
   statsUpdated: 1
   icon: {fileID: 21300000, guid: 6edbb326e30b6f34faa5cbf845476533, type: 3}

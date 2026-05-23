@@ -94,7 +94,7 @@ public class ZoneWeapon : Weapon
             // ✅ Check if damager is null before instantiating
             if (damager != null)
             {
-                GameObject damagerInstance = Instantiate(damager.gameObject, transform.position, Quaternion.identity, transform);
+                GameObject damagerInstance = Instantiate(damager.gameObject, transform.position, Quaternion.identity);
                 damagerInstance.SetActive(true);
                 
                 // ✅ Track this damager instance
@@ -105,10 +105,14 @@ public class ZoneWeapon : Weapon
                 if (damagerComponent != null)
                 {
                     damagerComponent.damageAmount = stats[weaponLevel].damage;
-                    damagerComponent.lifeTime = stats[weaponLevel].duration;
-                    damagerComponent.timeBetweenDamage = stats[weaponLevel].speed;
+                    // ✅ Animation duration = frameDuration * number of frames
+                    float animationDuration = frameDuration * animationFrames.Length;
+                    damagerComponent.lifeTime = Mathf.Max(animationDuration, stats[weaponLevel].duration);
+                    damagerComponent.timeBetweenDamage = 0.1f;  // Damage every 0.1s during animation
                     damagerComponent.damageOverTime = true;
                     damagerComponent.shouldKnockBack = true;
+                    
+                    Debug.Log($"✅ Damager setup: lifeTime={damagerComponent.lifeTime}, animDuration={animationDuration}, damagePerTick={damagerComponent.damageAmount}");
                 }
                 
                 // ✅ Ensure CircleCollider2D exists and is trigger
@@ -119,6 +123,15 @@ public class ZoneWeapon : Weapon
                 }
                 collider.isTrigger = true; // Make sure it's a trigger
                 collider.radius = stats[weaponLevel].range * damageRadiusMultiplier; // Apply damage radius multiplier
+                
+                // ✅ Ensure Rigidbody2D exists for trigger detection
+                Rigidbody2D rb = damagerInstance.GetComponent<Rigidbody2D>();
+                if (rb == null)
+                {
+                    rb = damagerInstance.AddComponent<Rigidbody2D>();
+                }
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.isKinematic = true;
                 
                 // ✅ Scale visual
                 damagerInstance.transform.localScale = Vector3.one * stats[weaponLevel].range;

@@ -153,15 +153,22 @@ public void ApplyClassVisualOnly(ClassData classData)
     }
 
     // ✅ Nếu là secondary class (không phải first), chỉ thêm overlay + weapons
-    bool isSecondaryClass = ClassManager.instance != null && classData != ClassManager.instance.firstClassSelected;
+    // ✅ Secondary = classData khác với active class hiện tại (giữ weapons của primary)
+    bool isSecondaryClass = ClassManager.instance != null && 
+        ClassManager.instance.ActiveClass != null && 
+        classData != ClassManager.instance.ActiveClass;
 
-    DisableCurrentWeapons();
-    assignedWeapons.Clear();
-    unassignedWeapons.Clear();  
-    fullyLevelledWeapons.Clear();
+    // ✅ CHỈ clear weapons nếu là primary class, secondary class giữ weapons của primary
+    if (!isSecondaryClass)
+    {
+        DisableCurrentWeapons();
+        assignedWeapons.Clear();
+        unassignedWeapons.Clear();  
+        fullyLevelledWeapons.Clear();
+    }
 
-    // ✅ Chỉ spawn starter weapon khi chuyển class
-    if (classData.starterWeapon != null)
+    // ✅ Chỉ spawn starter weapon khi chuyển class (primary class)
+    if (!isSecondaryClass && classData.starterWeapon != null)
         SpawnAndAssignWeapon(classData.starterWeapon);
 
     // ✅ Các weapons khác trong classWeapons được thêm vào unassignedWeapons (chưa active)
@@ -170,7 +177,7 @@ public void ApplyClassVisualOnly(ClassData classData)
         foreach (GameObject weaponPrefab in classData.classWeapons)
         {
             if (weaponPrefab == null) continue;
-            if (classData.starterWeapon != null && weaponPrefab == classData.starterWeapon) continue;
+            if (!isSecondaryClass && classData.starterWeapon != null && weaponPrefab == classData.starterWeapon) continue;
 
             // Tạo weapon nhưng KHÔNG activate nó, để vào unassignedWeapons
             GameObject weaponObj = Instantiate(weaponPrefab, transform);
@@ -183,7 +190,7 @@ public void ApplyClassVisualOnly(ClassData classData)
             {
                 weapon.weaponPrefab = weaponPrefab;
                 unassignedWeapons.Add(weapon);  // ← Thêm vào unassignedWeapons
-                Debug.Log($"✅ Created weapon: {weapon.name} (unassigned, waiting for level-up choice)");
+                Debug.Log($"✅ Created weapon: {weapon.name} (unassigned, {(isSecondaryClass ? "secondary class" : "waiting for level-up choice")})");
             }
         }
     }

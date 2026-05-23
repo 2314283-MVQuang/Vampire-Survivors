@@ -52,21 +52,21 @@ MonoBehaviour:
     timeBetweenAttacks: 7
     amount: 3
     duration: 0
-    upgradeText: 
+    upgradeText: VoidRift 1
   - speed: 0
     damage: 75
     range: 3.5
     timeBetweenAttacks: 6.5
     amount: 5
     duration: 0
-    upgradeText: 
+    upgradeText: VoidRift 2
   - speed: 0
     damage: 100
     range: 4
     timeBetweenAttacks: 6
     amount: 7
     duration: 0
-    upgradeText: 
+    upgradeText: VoidRift 3
   weaponLevel: 0
   statsUpdated: 0
   icon: {fileID: -1009348033, guid: 42f84cbc4a3aaa940832d8852ff10984, type: 3}

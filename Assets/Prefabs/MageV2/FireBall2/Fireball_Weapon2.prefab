@@ -51,21 +51,21 @@ MonoBehaviour:
     timeBetweenAttacks: 2
     amount: 3
     duration: 5
-    upgradeText: Fire ball
+    upgradeText: Dark FireBall 1
   - speed: 8
     damage: 40
     range: 10
     timeBetweenAttacks: 1.5
     amount: 5
     duration: 5
-    upgradeText: Fire ball 2
+    upgradeText: Dark FireBall 2
   - speed: 9
     damage: 50
     range: 12
     timeBetweenAttacks: 1.5
     amount: 7
     duration: 5
-    upgradeText: Fire ball 3
+    upgradeText: Dark FireBall 3
   weaponLevel: 0
   statsUpdated: 1
   icon: {fileID: 21300000, guid: b091f04a944e788498e166f6325d5c48, type: 3}

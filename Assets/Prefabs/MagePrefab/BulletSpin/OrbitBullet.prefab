@@ -4865,7 +4865,7 @@ MonoBehaviour:
     timeBetweenAttacks: 3
     amount: 1
     duration: 7
-    upgradeText: Speed 1.1
+    upgradeText: Speed x1.1
   - speed: 1.2
     damage: 20
     range: 2.5

@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: Ranger
   m_EditorClassIdentifier: 
   className: Ranger
-  classDescription: "A swift hunter who fights from a distance. Excels at rapid multi-target attacks from afar."
+  classDescription: A swift hunter who fights from a distance. Excels at rapid multi-target
+    attacks from afar.
   classIcon: {fileID: 0}
+  animatorController: {fileID: 0}
+  characterPrefab: {fileID: 0}
+  overlayPrefab: {fileID: 0}
+  starterWeapon: {fileID: 0}
   classWeapons: []
   promotionClass: {fileID: 0}
-  promotionDescription: "Promote Ranger to Sniper Master - become the ultimate ranged predator!"
-  secondClassUnlockChance: 0.15
+  promotionDescription: Promote Ranger to Sniper Master - become the ultimate ranged
+    predator!
+  secondClassUnlockChance: 1

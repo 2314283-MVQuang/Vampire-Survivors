@@ -92,17 +92,23 @@ public class ExperienceLevelController : MonoBehaviour
         var choices = new List<LevelUpChoice>();
         ClassManager cm = ClassManager.instance;
 
+        Debug.Log($"🔍 BuildClassBasedLevelUpChoices - buttons.Length: {buttons?.Length ?? -1}, HasNoClass: {cm.HasNoClass}");
+
         UIController.instance.SetLevelUpPanelTitle("Choose Your Path");
 
         // --------------------------------------------------
-        // Case 1: Player has no class yet → show class selection
+        // Case 1: Player has no class yet OR only has Starter → show class selection
         // --------------------------------------------------
-        if (cm.HasNoClass)
+        bool shouldOfferClasses = cm.HasNoClass || (cm.ActiveClass != null && cm.ActiveClass.className == "Starter");
+        
+        if (shouldOfferClasses)
         {
             UIController.instance.SetLevelUpPanelTitle("Choose Your Class");
 
             var unlockable = cm.GetUnlockableClasses();
             int count = Mathf.Min(unlockable.Count, buttons.Length);
+            
+            Debug.Log($"🔍 Case 1: ShouldOfferClasses - unlockable.Count: {unlockable.Count}, count: {count}");
 
             for (int i = 0; i < count; i++)
             {
@@ -111,6 +117,7 @@ public class ExperienceLevelController : MonoBehaviour
                     type = ChoiceType.SelectClass,
                     classData = unlockable[i]
                 });
+                Debug.Log($"  ✅ Added class choice: {unlockable[i].className}");
             }
         }
         else
@@ -120,6 +127,7 @@ public class ExperienceLevelController : MonoBehaviour
                 return;
 
             bool allWeaponsMaxed = cm.AreAllWeaponsMaxedForClass(activeClass);
+            Debug.Log($"🔍 allWeaponsMaxed for {activeClass.className}: {allWeaponsMaxed}");
 
             // ✅ Nếu tất cả weapons max → spawn ascend stones thay vì offer promotion
             if (allWeaponsMaxed)
@@ -129,6 +137,14 @@ public class ExperienceLevelController : MonoBehaviour
                     AscendStoneManager.instance.SpawnAscendStones();
                     Debug.Log("✅ All weapons maxed! Ascend stones spawned.");
                 }
+                else
+                {
+                    Debug.LogWarning("❌ AscendStoneManager.instance is NULL");
+                }
+            }
+            else
+            {
+                Debug.Log($"⚠️ Not all weapons maxed for {activeClass.className}");
             }
 
             // --------------------------------------------------
@@ -150,7 +166,12 @@ public class ExperienceLevelController : MonoBehaviour
                     }
                 }
             }
-            
+
+            // ✅ DEBUG: Check unlockable classes
+            var unlockableClasses = cm.GetUnlockableClasses();
+            Debug.Log($"✅ Unlockable classes: {unlockableClasses.Count}");
+            foreach (var uc in unlockableClasses)
+                Debug.Log($"  - {uc.className}");
 
             // Số slot dành cho weapon (dùng hết buttons, class offer sẽ fill nếu còn slot)
             int maxWeaponSlots = buttons.Length;  // ✅ Dùng hết buttons
@@ -176,13 +197,22 @@ public class ExperienceLevelController : MonoBehaviour
             if (cm.CanUnlockNewClass && choices.Count < buttons.Length)
             {
                 var unlockable = cm.GetUnlockableClasses();
-                // nếu muốn vẫn ưu tiên khi allWeaponsMaxed, có thể điều chỉnh roll
                 foreach (var candidate in unlockable)
                 {
+                    // Stop if no more slots
+                    if (choices.Count >= buttons.Length)
+                        break;
+
+                    // ✅ Skip class đã chọn
+                    if (cm.HasClass(candidate))
+                        continue;
+
                     float roll = Random.value;
 
-                    // ví dụ: nếu vũ khí đã max thì tăng tỉ lệ x2
-                    float baseChance = candidate.secondClassUnlockChance;
+                    // ✅ Nếu chưa chọn class nào → 100% offer tất cả
+                    // ✅ Nếu đã chọn class → 5% offer class khác
+                    float baseChance = cm.HasNoClass ? 1f : 0.05f;
+                    
                     if (allWeaponsMaxed)
                         baseChance *= 2f;
 
@@ -193,8 +223,7 @@ public class ExperienceLevelController : MonoBehaviour
                             type = ChoiceType.SelectClass,
                             classData = candidate
                         });
-                        Debug.Log($"✅ Offered new class: {candidate.className} (roll={roll}, chance={baseChance})");
-                        break;
+                        Debug.Log($"✅ Offered class: {candidate.className} (hasNoClass={cm.HasNoClass}, roll={roll}, chance={baseChance})");
                     }
                 }
             }
@@ -243,16 +272,20 @@ public class ExperienceLevelController : MonoBehaviour
         // --------------------------------------------------
         // Apply choices to buttons
         // --------------------------------------------------
+        Debug.Log($"🔍 Final choices.Count: {choices.Count}, buttons.Length: {buttons.Length}");
+        
         for (int i = 0; i < buttons.Length; i++)
         {
             if (i < choices.Count)
             {
                 buttons[i].gameObject.SetActive(true);
                 buttons[i].SetChoice(choices[i]);
+                Debug.Log($"  ✅ Button {i} active with choice type: {choices[i].type}");
             }
             else
             {
                 buttons[i].gameObject.SetActive(false);
+                Debug.Log($"  ❌ Button {i} deactivated");
             }
         }
 

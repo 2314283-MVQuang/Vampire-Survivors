@@ -43,6 +43,20 @@ public class Weapon : MonoBehaviour
             }
         }
     }
+
+    // ✅ Stop tất cả active coroutines của weapon này (dùng khi promote/disable)
+    public void StopActiveSkill()
+    {
+        StopAllCoroutines();
+        
+        // ✅ Destroy tất cả temporary effects (children objects)
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
+        
+        Debug.Log($"✅ Stopped all coroutines and effects for weapon: {gameObject.name}");
+    }
 }
 
 [System.Serializable]
