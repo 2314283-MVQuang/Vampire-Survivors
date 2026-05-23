@@ -17,6 +17,10 @@ public class EnemyController : MonoBehaviour
     public int coinValue = 1; // The value of the coin. D
     public float coinDropRate = 0.5f; // The rate at which the coin drops. D
 
+    [Header("Sprite Settings")]
+    // Khai báo biến kiểm tra hướng mặt mặc định của quái
+    public bool faceLeftByDefault = false; 
+
     void Start()
     {
         //target = FindObjectOfType<PlayerController>().transform; // Find the player and set it as the target. AK
@@ -39,13 +43,26 @@ public class EnemyController : MonoBehaviour
 
                 if (knockBackCounter <= 0) // If the knock back counter is less than or equal to 0. AK
                 {
-                    moveSpeed = Mathf.Abs(moveSpeed *
-                                          .5f); // Set the move speed to the negative move speed times 0.5. AK
+                    moveSpeed = Mathf.Abs(moveSpeed * .5f); // Set the move speed to the negative move speed times 0.5. AK
                 }
             }
 
-            theRB.velocity =
-                (target.position - transform.position).normalized * moveSpeed; // Move the enemy towards the target. AK
+            theRB.velocity = (target.position - transform.position).normalized * moveSpeed; // Move the enemy towards the target. AK
+
+            // --- ĐOẠN CODE TỰ ĐỘNG LẬT MẶT QUÁI ---
+            Vector3 newScale = transform.localScale; 
+            float baseScaleX = Mathf.Abs(newScale.x);
+
+            if (target.position.x > transform.position.x) // Nếu nhân vật đứng ở bên PHẢI quái
+            {
+                newScale.x = baseScaleX * (faceLeftByDefault ? -1f : 1f); 
+            }
+            else if (target.position.x < transform.position.x) // Nếu nhân vật đứng ở bên TRÁI quái
+            {
+                newScale.x = baseScaleX * (faceLeftByDefault ? 1f : -1f); 
+            }
+            transform.localScale = newScale; 
+            // ----------------------------------------
 
             if (hitCounter > 0) // If the hit counter is greater than 0. AK
             {
@@ -68,37 +85,36 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-        public void TakeDamage(float damageToTake) // Function to take damage. AK
+    public void TakeDamage(float damageToTake) // Function to take damage. AK
+    {
+        health -= damageToTake; // Decrease the health by the damage. AK
+
+        if (health <= 0) // If the health is less than or equal to 0. AK
         {
-            health -= damageToTake; // Decrease the health by the damage. AK
-
-            if (health <= 0) // If the health is less than or equal to 0. AK
+            Destroy(gameObject); // Destroy the enemy. AK
+            ExperienceLevelController.instance.SpawnExp(transform.position, expToGive); // Set the experience when the enemy is destroyed. GK
+            if (Random.value <= coinDropRate) // If the random value is less than or equal to the coin drop rate. D
             {
-                Destroy(gameObject); // Destroy the enemy. AK
-                ExperienceLevelController.instance.SpawnExp(transform.position,
-                    expToGive); // Set the experience when the enemy is destroyed. GK
-                if (Random.value <= coinDropRate) // If the random value is less than or equal to the coin drop rate. D
-                {
-                    CoinController.instance.DropCoin(transform.position, coinValue); // Drop the coin. D
-                }
-
-                SFXManager.instance.PlaySFXPitched(0); // Play the sound effect. D
-            }
-            else
-            {
-                SFXManager.instance.PlaySFXPitched(1); // Play the sound effect. D
+                CoinController.instance.DropCoin(transform.position, coinValue); // Drop the coin. D
             }
 
-            DamageNumberController.instance.SpawnDamage(damageToTake, transform.position); // Spawn the damage number. AK
+            SFXManager.instance.PlaySFXPitched(0); // Play the sound effect. D
+        }
+        else
+        {
+            SFXManager.instance.PlaySFXPitched(1); // Play the sound effect. D
         }
 
-        public void TakeDamage(float damageToTake, bool shouldKnockBack) // Function to take damage. AK
-        {
-            TakeDamage(damageToTake); // Take damage. AK
+        DamageNumberController.instance.SpawnDamage(damageToTake, transform.position); // Spawn the damage number. AK
+    }
 
-            if (shouldKnockBack == true) // If the enemy should be knocked back. AK
-            {
-                knockBackCounter = knockBackTime; // Set the knock back counter to the knock back time. AK
-            }
+    public void TakeDamage(float damageToTake, bool shouldKnockBack) // Function to take damage. AK
+    {
+        TakeDamage(damageToTake); // Take damage. AK
+
+        if (shouldKnockBack == true) // If the enemy should be knocked back. AK
+        {
+            knockBackCounter = knockBackTime; // Set the knock back counter to the knock back time. AK
         }
+    }
 }

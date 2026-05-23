@@ -33,42 +33,26 @@ public class HealthPickup : MonoBehaviour
             float maxHP = PlayerHealthController.instance.maxHealth;
             float currentHP = PlayerHealthController.instance.currentHealth;
 
-            // Nếu máu đầy thì không nhặt (tùy chọn, bạn có thể bỏ check này nếu muốn ăn luôn dù đầy máu)
+            // Nếu máu đã đầy sẵn thì giữ lại bình máu, không ăn lãng phí
             if (currentHP >= maxHP) return;
 
-            // Tính lượng máu đã mất
-            float missingHP = maxHP - currentHP;
+            // --- THAY ĐỔI TẠI ĐÂY: HỒI 100% ĐẦY CÂY MÁU ---
+            PlayerHealthController.instance.currentHealth = maxHP;
+            // ----------------------------------------------
 
-            // Tính lượng máu sẽ hồi (10% của lượng máu đã mất)
-            float calculatedHeal = missingHP * 0.10f;
-
-            // Chốt chặn: hồi tối thiểu 1 HP
-            if (calculatedHeal < 1f && missingHP > 0)
-            {
-                calculatedHeal = 1f;
-            }
-
-            // Cộng máu
-            PlayerHealthController.instance.currentHealth += calculatedHeal;
-
-            // Đảm bảo không vượt quá Max HP
-            if (PlayerHealthController.instance.currentHealth > maxHP)
-            {
-                PlayerHealthController.instance.currentHealth = maxHP;
-            }
-
-            // Cập nhật UI
+            // Cập nhật UI thanh máu dài ra tối đa
             if (PlayerHealthController.instance.healthSlider != null)
             {
                 PlayerHealthController.instance.healthSlider.value = PlayerHealthController.instance.currentHealth;
             }
 
-            // Phát âm thanh hồi máu (Giả sử âm thanh số 2 là nhặt đồ)
+            // Phát âm thanh hồi máu
             if (SFXManager.instance != null)
             {
                 SFXManager.instance.PlaySFXPitched(2);
             }
 
+            // Biến mất bình máu sau khi ăn
             Destroy(gameObject);
         }
     }
