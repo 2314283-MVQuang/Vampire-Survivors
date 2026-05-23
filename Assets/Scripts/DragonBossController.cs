@@ -21,11 +21,17 @@ public class DragonBossController : MonoBehaviour
     private State currentState;
     private float timer;
 
+    // --- BIẾN MỚI: Quản lý bộ điều khiển hoạt ảnh Animator ---
+    private Animator anim;
+
     // --- BIẾN MỚI: Dùng để chốt chết hướng ngắm ---
     private Vector2 lockedAimDirection; 
 
     void Start()
     {
+        // Lấy thành phần Animator gắn trên người con rồng
+        anim = GetComponent<Animator>();
+
         if (PlayerHealthController.instance != null)
             player = PlayerHealthController.instance.transform;
             
@@ -37,6 +43,8 @@ public class DragonBossController : MonoBehaviour
         if (player == null || !player.gameObject.activeSelf) 
         {
             theRB.velocity = Vector2.zero;
+            // Nếu không có player, cho Boss đứng im cụp cánh
+            if (anim != null) anim.SetBool("isMoving", false);
             return;
         }
 
@@ -59,20 +67,23 @@ public class DragonBossController : MonoBehaviour
         Vector2 direction = (player.position - transform.position).normalized;
         theRB.velocity = direction * moveSpeed;
 
-        // Xoay mặt rồng cho đúng
+        // BẬT đập cánh khi đang trong trạng thái di chuyển áp sát
+        if (anim != null) anim.SetBool("isMoving", true);
+
+        // Xoay mặt rồng cho đúng hướng di chuyển
         if (direction.x > 0)
             transform.localScale = new Vector3(1f, 1f, 1f);  
         else if (direction.x < 0)
             transform.localScale = new Vector3(-1f, 1f, 1f); 
 
-        // Nếu vào tầm thì dừng lại chuẩn bị khạc lửa
+        // Nếu vào tầm đánh thì khựng lại chuẩn bị khạc lửa
         if (Vector3.Distance(transform.position, player.position) < attackRange)
         {
             theRB.velocity = Vector2.zero;
             currentState = State.Telegraphing;
             timer = telegraphTime;
 
-            // --- BÍ QUYẾT LÀ ĐÂY: Chốt luôn hướng ngắm ngay khi vừa khựng lại ---
+            // Chốt luôn hướng ngắm ngay khi vừa khựng lại
             if (fireSpawnPoint != null)
             {
                 lockedAimDirection = (player.position - fireSpawnPoint.position).normalized;
@@ -82,6 +93,9 @@ public class DragonBossController : MonoBehaviour
 
     private void HandleTelegraphing()
     {
+        // TẮT đập cánh (cụp cánh lại đứng im) khi đang tụ lực khạc lửa
+        if (anim != null) anim.SetBool("isMoving", false);
+
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
@@ -95,7 +109,7 @@ public class DragonBossController : MonoBehaviour
     {
         if (firePrefab != null && fireSpawnPoint != null)
         {
-            // --- Dùng góc đã chốt từ 1 giây trước để bắn, kệ người chơi chạy đi đâu ---
+            // Dùng góc đã chốt từ 1 giây trước để bắn
             float angle = Mathf.Atan2(lockedAimDirection.y, lockedAimDirection.x) * Mathf.Rad2Deg;
             Instantiate(firePrefab, fireSpawnPoint.position, Quaternion.Euler(0, 0, angle));
         }
@@ -103,6 +117,9 @@ public class DragonBossController : MonoBehaviour
 
     private void HandleCooldown()
     {
+        // Tiếp tục TẮT đập cánh trong thời gian chờ hồi chiêu (cooldown)
+        if (anim != null) anim.SetBool("isMoving", false);
+
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
