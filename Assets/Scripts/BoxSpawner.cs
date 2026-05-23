@@ -4,17 +4,17 @@ public class BoxSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
     public GameObject boxPrefab;         // Kéo Prefab Cái Hộp (Crate) vào đây
-    public float spawnInterval = 7f;     // Cứ 7 giây xuất hiện 1 cái
+    public float spawnInterval = 40f;    // Thay đổi từ 7 giây thành 20 giây mặc định
     
     [Header("Distance From Player")]
-    public float minSpawnRadius = 6f;    // Khoảng cách tối thiểu (để không đẻ ngay đỉnh đầu player)
-    public float maxSpawnRadius = 12f;   // Khoảng cách tối đa (để không đẻ quá xa tầm nhìn)
+    public float minSpawnRadius = 6f;    // Khoảng cách tối thiểu
+    public float maxSpawnRadius = 12f;   // Khoảng cách tối đa
 
     private float spawnTimer;
 
     void Start()
     {
-        // Đặt thời gian đếm ngược ban đầu là 7 giây
+        // Đặt thời gian đếm ngược ban đầu là 20 giây
         spawnTimer = spawnInterval;
     }
 
@@ -27,8 +27,13 @@ public class BoxSpawner : MonoBehaviour
 
             if (spawnTimer <= 0)
             {
-                SpawnBoxAroundPlayer();
-                spawnTimer = spawnInterval; // Đặt lại đồng hồ 7 giây cho lần tiếp theo
+                // VÒNG LẶP CHẠY 3 LẦN: Sinh ra đúng 3 hộp cùng một lúc tại các vị trí ngẫu nhiên khác nhau
+                for (int i = 0; i < 3; i++)
+                {
+                    SpawnBoxAroundPlayer();
+                }
+
+                spawnTimer = spawnInterval; // Đặt lại đồng hồ 20 giây cho lần tiếp theo
             }
         }
     }
